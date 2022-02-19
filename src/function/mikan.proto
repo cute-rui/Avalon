@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package mikan;
+
+option go_package = "./mikan";
+
+service Mikan {
+  rpc GetInfo (Param) returns (Info);
+}
+
+enum DataType {
+  TORRENT = 0;
+  MAGLINK = 1;
+}
+
+message Info {
+  int32 Code = 1;
+
+  string Msg = 2;
+
+  string BangumiName = 3;
+
+  string BangumiID = 4;
+
+  string SubgroupID = 5;
+
+  repeated Data Data = 6;
+}
+
+message Param {
+  string Bangumi = 1;
+  optional string Subgroup = 2;
+}
+
+message Data {
+  string Title = 1;
+
+  string URL = 2;
+
+  DataType DataType = 3;
+}
+
+

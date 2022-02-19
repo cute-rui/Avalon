@@ -1,0 +1,663 @@
+syntax = "proto3";
+
+import "google/protobuf/struct.proto";
+
+package mirai;
+
+option go_package = "./mirai";
+
+service MiraiAgent {
+  rpc Subscribe(InitParam) returns (stream Message);
+  rpc About(SelfParam) returns (AboutResult);
+  rpc GetMessageFromId(GetMessageParam) returns (GetMessageResult);
+  rpc ListFriend(SelfParam) returns (ListFriendResult);
+  rpc ListGroup(SelfParam) returns (ListGroupResult);
+  rpc ListMember(ListMemberParam) returns (ListMemberResult);
+  rpc GetBotProfile(SelfParam) returns (GetProfileResult);
+  rpc GetFriendProfile(GetFriendParam) returns (GetProfileResult);
+  rpc GetMemberProfile(GetMemberParam) returns (GetProfileResult);
+  rpc SendFriendMessage(SendFriendMessageParam) returns (UniversalSendMessageResult);
+  rpc SendGroupMessage(SendGroupMessageParam) returns (UniversalSendMessageResult);
+  rpc SendTempMessage(SendTempMessageParam) returns (UniversalSendMessageResult);
+  rpc SendNudge(SendNudgeParam) returns (UniversalResponseResult);
+  rpc Recall(RecallParam) returns (UniversalResponseResult);
+  rpc ListFile(ListFileParam) returns (ListFileResult);
+  rpc GetFileInfo(GetFileInfoParam) returns (GetFileInfoResult);
+  rpc FileMkdir(FileMkdirParam) returns (FileMkdirResult);
+  rpc FileDelete(FileDeleteParam) returns (UniversalResponseResult);
+  rpc FileMove(FileMoveParam) returns (UniversalResponseResult);
+  rpc FileRename(FileRenameParam) returns (UniversalResponseResult);
+  rpc DeleteFriend(DeleteFriendParam) returns (UniversalResponseResult);
+  rpc Mute(MuteParam) returns (UniversalResponseResult);
+  rpc Unmute(UnmuteParam) returns (UniversalResponseResult);
+  rpc Kick(KickParam) returns (UniversalResponseResult);
+  rpc Quit(QuitParam) returns (UniversalResponseResult);
+  rpc MuteAll(MuteAllParam) returns (UniversalResponseResult);
+  rpc UnmuteAll(UnmuteAllParam) returns (UniversalResponseResult);
+  rpc SetEssence(SetEssenceParam) returns (UniversalResponseResult);
+  rpc GetGroupConfig(GetGroupConfigParam) returns (GetGroupConfigResult);
+  rpc UpdateGroupConfig(UpdateGroupConfigParam) returns (UniversalResponseResult);
+  rpc GetMemberInfo(GetMemberInfoParam) returns (GetMemberInfoResult);
+  rpc UpdateMemberInfo(UpdateMemberInfoParam) returns (UniversalResponseResult);
+  rpc SetMemberAdmin(SetMemberAdminParam) returns (UniversalResponseResult);
+  rpc SendNewFriendRequestEventResponse(NewFriendRequestEventResponse) returns (UniversalResponseResult);
+  rpc SendMemberJoinRequestEventResponse(MemberJoinRequestEventResponse) returns (UniversalResponseResult);
+  rpc SendBotInvitedJoinGroupRequestEventResponse(BotInvitedJoinGroupRequestEventResponse) returns (UniversalResponseResult);
+  //rpc ExecCommand(QuitParam) returns (QuiteResult);
+  //rpc EnrollCommand(QuitParam) returns (QuiteResult);
+}
+
+message InitParam {
+  string verifyKey = 1;
+  string sessionKey = 2;
+  int64 qq = 3;
+  MessageChannel MessageChannel = 4;
+}
+
+enum MessageChannel {
+  message = 0;
+  event = 1;
+  all = 2;
+}
+
+message SendFriendMessageParam {
+  int64 target = 1;
+  int64 quote = 2;
+  repeated MessageObject messageChain = 3;
+  optional int64 BotQQNumber = 4;
+}
+
+message SendGroupMessageParam {
+  int64 target = 1;
+  int64 quote = 2;
+  repeated MessageObject messageChain = 3;
+  optional int64 BotQQNumber = 4;
+}
+
+message SendTempMessageParam {
+  int64 qq = 1;
+  int64 group = 2;
+  int64 quote = 3;
+  repeated MessageObject messageChain = 4;
+  optional int64 BotQQNumber = 5;
+}
+
+message GetMessageResult {
+  int32 code = 1;
+  string msg = 2;
+  Message data = 3;
+}
+
+message Message {
+  MessageType type = 1;
+  repeated MessageObject messageChain = 2;
+  optional int64 qq = 3;
+  // inputting status
+  optional Friend friend = 4;
+  optional bool inputting = 5;
+  // nickname changed
+  optional string from = 6;
+  optional string to = 7;
+  //bot permission
+  optional string origin = 8;
+  optional string current = 9;
+  optional Group group = 10;
+  //bot mute
+  optional int32 durationSeconds = 11;
+  optional google.protobuf.Value operator = 12;
+  optional Member invitor = 13;
+  //group recall
+  optional int64 authorId = 14;
+  optional int64 messageId = 15;
+  optional int64 time = 16;
+  //Nudge
+  optional int64 fromId = 17;
+  optional Subject subject = 18;
+  optional string action = 19;
+  optional string suffix = 20;
+  optional int64 target = 21;
+  //confessTalk
+  optional bool isByBot = 22;
+  //member join
+  optional Member member = 23;
+  optional string honor = 24;
+  //event
+  optional int64 eventId = 25;
+  optional int64 groupId = 26;
+  optional string groupName = 27;
+  optional string nick = 28;
+  optional string message = 29;
+  optional Client client = 30;
+  optional int64 kind = 31;
+  repeated MessageObject args = 32;
+  //message detail
+  optional Sender sender = 33;
+}
+
+message Sender {
+  int64 id = 1;
+  optional string memberName = 2;
+  optional Permission permission = 3;
+  optional string specialTitle = 4;
+  optional int64 joinTimestamp = 5;
+  optional int64 lastSpeakTimestamp = 6;
+  optional int32 muteTimeRemaining = 7;
+  optional Group group = 8;
+  optional string nickname = 9;
+  optional string remark = 10;
+  optional string platform = 11;
+}
+
+message Client {
+  int64 id = 1;
+  string platform = 2;
+}
+
+message Subject {
+  int64 id = 1;
+
+  enum NudgeContextType {
+    Friend = 0;
+    Group = 1;
+    Stranger = 2;
+  }
+
+  NudgeContextType kind = 2;
+}
+
+enum MessageType {
+  FriendMessage = 0;
+  GroupMessage = 1;
+  TempMessage = 2;
+  StrangerMessage = 3;
+  OtherClientMessage = 4;
+  //Events
+  BotOnlineEvent = 5;
+  BotOfflineEventActive = 6;
+  BotOfflineEventForce = 7;
+  BotOfflineEventDropped = 8;
+  BotReloginEvent = 9;
+  FriendInputStatusChangedEvent = 10;
+  FriendNickChangedEvent = 11;
+  BotGroupPermissionChangeEvent = 12;
+  BotMuteEvent = 13;
+  BotUnmuteEvent = 14;
+  BotJoinGroupEvent = 15;
+  BotLeaveEventActive = 16;
+  BotLeaveEventKick = 17;
+  GroupRecallEvent = 18;
+  FriendRecallEvent = 19;
+  NudgeEvent = 20;
+  GroupNameChangeEvent = 21;
+  GroupEntranceAnnouncementChangeEvent = 22;
+  GroupMuteAllEvent = 23;
+  GroupAllowAnonymousChatEvent = 24;
+  GroupAllowConfessTalkEvent = 25;
+  GroupAllowMemberInviteEvent = 26;
+  MemberJoinEvent = 27;
+  MemberLeaveEventKick = 28;
+  MemberLeaveEventQuit = 29;
+  MemberCardChangeEvent = 30;
+  MemberSpecialTitleChangeEvent = 31;
+  MemberPermissionChangeEvent = 32;
+  MemberMuteEvent = 33;
+  MemberUnmuteEvent = 34;
+  MemberHonorChangeEvent = 35;
+  NewFriendRequestEvent = 36;
+  MemberJoinRequestEvent = 37;
+  BotInvitedJoinGroupRequestEvent = 38;
+  OtherClientOnlineEvent = 39;
+  OtherClientOfflineEvent = 40;
+  CommandExecutedEvent = 41;
+}
+
+enum MessageObjectType {
+  Source = 0;
+  Quote = 1;
+  At = 2;
+  AtAll = 3;
+  Face = 4;
+  Plain = 5;
+  Image = 6;
+  FlashImage = 7;
+  Voice = 8;
+  Xml = 9;
+  Json = 10;
+  App = 11;
+  Poke = 12;
+  Dice = 13;
+  MusicShare = 14;
+  Forward = 15;
+  File = 16;
+  MiraiCode = 17;
+}
+
+message MessageObject {
+  MessageObjectType type = 1;
+  //Source
+  optional google.protobuf.Value id = 2;
+  optional int64 time = 3;
+  //Quote
+  optional int64 groupId = 4;
+  optional int64 senderId = 5;
+  optional int64 targetId = 6;
+  repeated MessageObject origin = 7;
+  //At
+  optional string display = 8;
+  //Face
+  optional int32 faceId = 9;
+  //FaceOrPoke
+  optional string name = 10;
+  //Plain
+  optional string text = 11;
+  //Image
+  optional string imageId = 12;
+  optional string url = 13;
+  optional string path = 14;
+  optional string base64 = 15;
+  //Voice
+  optional string voiceId = 16;
+  optional int64 length = 17;
+  //XML
+  optional string xml = 18;
+  //JSON
+  optional string json = 19;
+  //APP
+  optional string content = 20;
+  //Dice
+  optional int32 value = 21;
+  //MusicShare
+  optional string kind = 22;
+  optional string title = 23;
+  optional string summary = 24;
+  optional string jumpUrl = 25;
+  optional string pictureUrl = 26;
+  optional string musicUrl = 27;
+  optional string brief = 28;
+  //ForwardMessage
+  repeated MessageObject nodeList = 29;
+  //File
+  optional int64 size = 30;
+  optional string code = 31;
+}
+
+message ForwardNode {
+  int64 senderId = 1;
+  int64 time = 2;
+  string senderName = 3;
+  repeated MessageObject messageChain = 4;
+  int64 messageId = 5;
+}
+
+//Merged because of limitation of postman
+
+message SelfParam {
+  int64 BotQQNumber = 1;
+}
+
+message GetMessageParam {
+  int64 id = 1;
+  optional int64 BotQQNumber = 2;
+}
+
+message ListMemberParam {
+  int64 target = 1;
+  optional int64 BotQQNumber = 2;
+}
+
+message GetFriendParam {
+  int64 target = 1;
+  optional int64 BotQQNumber = 2;
+}
+
+message GetMemberParam {
+  int64 target = 1;
+  int64 memberId = 2;
+  optional int64 BotQQNumber = 3;
+}
+
+message SendNudgeParam {
+  int64 target = 1;
+  int64 subject = 2;
+
+  enum NudgeContextType {
+    Friend = 0;
+    Group = 1;
+    Stranger = 2;
+  }
+
+  NudgeContextType kind = 3;
+  optional int64 BotQQNumber = 4;
+}
+
+message RecallParam {
+  int64 target = 1;
+  optional int64 BotQQNumber = 2;
+}
+
+message ListFileParam {
+  string id = 1;
+  string path = 2;
+  int64 target = 3;
+  bool withDownloadInfo = 4;
+  int32 offset = 5;
+  int32 size = 6;
+  optional int64 BotQQNumber = 7;
+}
+
+message GetFileInfoParam {
+  string id = 1;
+  string path = 2;
+  int64 target = 3;
+  bool withDownloadInfo = 4;
+  optional int64 BotQQNumber = 5;
+}
+
+message FileMkdirParam {
+  string id = 1;
+  string path = 2;
+  int64 target = 3;
+  string directoryName = 4;
+  optional int64 BotQQNumber = 5;
+}
+
+message FileDeleteParam {
+  string id = 1;
+  string path = 2;
+  int64 target = 3;
+  optional int64 BotQQNumber = 4;
+}
+
+message FileMoveParam {
+  string id = 1;
+  string path = 2;
+  int64 target = 3;
+  string moveTo = 4;
+  string moveToPath = 5;
+  optional int64 BotQQNumber = 6;
+}
+
+message FileRenameParam {
+  string id = 1;
+  string path = 2;
+  int64 target = 3;
+  string renameTo = 4;
+  optional int64 BotQQNumber = 5;
+}
+
+message DeleteFriendParam {
+  int64 target = 1;
+  optional int64 BotQQNumber = 2;
+}
+
+message MuteParam {
+  int64 target = 1;
+  int64 memberId = 2;
+  int32 time = 3;
+  optional int64 BotQQNumber = 4;
+}
+
+message UnmuteParam {
+  int64 target = 1;
+  int64 memberId = 2;
+  optional int64 BotQQNumber = 3;
+}
+
+
+message KickParam {
+  int64 target = 1;
+  int64 memberId = 2;
+  string msg = 3;
+  optional int64 BotQQNumber = 4;
+}
+
+message QuitParam {
+  int64 target = 1;
+  optional int64 BotQQNumber = 2;
+}
+
+message MuteAllParam {
+  int64 target = 1;
+  optional int64 BotQQNumber = 2;
+}
+
+message UnmuteAllParam {
+  int64 target = 1;
+  optional int64 BotQQNumber = 2;
+}
+
+message SetEssenceParam {
+  int64 target = 1;
+  optional int64 BotQQNumber = 2;
+}
+
+message GetGroupConfigParam {
+  int64 target = 1;
+  optional int64 BotQQNumber = 2;
+}
+
+message UpdateGroupConfigParam {
+  int64 target = 1;
+  GroupConfig config = 2;
+  optional int64 BotQQNumber = 3;
+}
+
+message GroupConfig {
+  string name = 1;
+  string announcement = 2;
+  string confessTalk = 3;
+  string allowMemberInvite = 4;
+  string autoApprove = 5;
+  string anonymousChat = 6;
+}
+
+message GetMemberInfoParam {
+  int64 target = 1;
+  int64 memberId = 2;
+  optional int64 BotQQNumber = 3;
+}
+
+message UpdateMemberInfoParam {
+  int64 target = 1;
+  int64 memberId = 2;
+  MemberInfo info = 3;
+  optional int64 BotQQNumber = 4;
+}
+
+message MemberInfo {
+  string name = 1;
+  string specialTitle = 2;
+}
+
+message SetMemberAdminParam {
+  int64 target = 1;
+  int64 memberId = 2;
+  bool assign = 3;
+  optional int64 BotQQNumber = 4;
+}
+
+message NewFriendRequestEventResponse {
+  int64 eventId = 1;
+  int64 fromId = 2;
+  int64 groupId = 3;
+  int32 operate = 4;
+  string message = 5;
+  optional int64 BotQQNumber = 6;
+}
+
+message MemberJoinRequestEventResponse {
+  int64 eventId = 1;
+  int64 fromId = 2;
+  int64 groupId = 3;
+  int32 operate = 4;
+  string message = 5;
+  optional int64 BotQQNumber = 6;
+}
+
+message BotInvitedJoinGroupRequestEventResponse {
+  int64 eventId = 1;
+  int64 fromId = 2;
+  int64 groupId = 3;
+  int32 operate = 4;
+  string message = 5;
+  optional int64 BotQQNumber = 6;
+}
+
+//Merged because of limitation of postman
+
+message UniversalResponseResult {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message AboutResult {
+  int32 code = 1;
+  string msg = 2;
+  optional About data = 3;
+}
+
+message About {
+  string version = 1;
+}
+
+message ListFriendResult {
+  int32 code = 1;
+  string msg = 2;
+  repeated Friend data = 3;
+}
+
+message Friend {
+  int64 id = 1;
+  string nickname = 2;
+  string remark = 3;
+}
+
+message ListGroupResult {
+  int32 code = 1;
+  string msg = 2;
+  repeated Group data = 3;
+}
+
+message Group {
+  int64 id = 1;
+  string name = 2;
+  Permission permission = 3;
+}
+
+enum Permission{
+  OWNER = 0;
+  ADMINISTRATOR = 1;
+  MEMBER = 2;
+}
+
+message ListMemberResult {
+  int32 code = 1;
+  string msg = 2;
+  repeated Member data = 3;
+}
+
+message Member {
+  int64 id = 1;
+  string memberName = 2;
+  Permission permission = 3;
+  string specialTitle = 4;
+  int64 joinTimestamp = 5;
+  int64 lastSpeakTimestamp = 6;
+  int32 muteTimeRemaining = 7;
+  Group group = 8;
+}
+
+message GetProfileResult {
+  int32 code = 7;
+  string msg = 8;
+  optional string nickname = 1;
+  optional string email = 2;
+  optional int32 age = 3;
+  optional int32 level = 4;
+  optional string sign = 5;
+  optional Sex sex = 6;
+}
+
+enum Sex {
+  UNKNOWN = 0;
+  MALE = 1;
+  FEMALE = 2;
+}
+
+message UniversalSendMessageResult {
+  int32 code = 1;
+  string msg = 2;
+  optional int64 messageId = 3;
+}
+
+message ListFileResult {
+  int32 code = 1;
+  string msg = 2;
+  repeated FileObject data = 3;
+}
+
+message FileObject {
+  string name = 1;
+  string id = 2;
+  string path = 3;
+  optional FileObject parent = 4;
+  FileContact contact = 5;
+  bool isFile = 6;
+  bool isDirectory = 7;
+  optional FileDownloadInfo downloadInfo = 8;
+}
+
+message FileContact {
+  int64 id = 1;
+  optional string name = 2;
+  optional Permission permission = 3;
+  optional string nickname = 4;
+  optional string remark = 5;
+}
+
+message FileDownloadInfo {
+  string sha1 = 1;
+  string md5 = 2;
+  int32 downloadTimes = 3;
+  int64 uploaderId = 4;
+  int64 uploadTime = 5;
+  int64 lastModifyTime = 6;
+  string url = 7;
+}
+
+message GetFileInfoResult {
+  int32 code = 1;
+  string msg = 2;
+  optional FileObject data = 3;
+}
+
+message FileMkdirResult {
+  int32 code = 1;
+  string msg = 2;
+  optional FileObject data = 3;
+}
+
+message GetGroupConfigResult {
+  optional int32 code = 1;
+  optional int32 msg = 2;
+  optional string name = 3;
+  optional string announcement = 4;
+  optional bool confessTalk = 5;
+  optional bool allowMemberInvite = 6;
+  optional bool autoApprove = 7;
+  optional bool anonymousChat = 8;
+}
+
+message GetMemberInfoResult {
+  optional int32 code = 1;
+  optional int32 msg = 2;
+  optional int64 id = 3;
+  optional string memberName = 4;
+  optional string specialTitle = 5;
+  optional Permission permission = 6;
+  optional int64 joinTimestamp = 7;
+  optional int64 lastSpeakTimestamp = 8;
+  optional int32 muteTimeRemaining = 9;
+  optional Group group = 10;
+}
+

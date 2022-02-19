@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package fileSystemService;
+
+option go_package = "./fileSystemService";
+
+service FileSystem {
+  rpc FSCreate (stream Param) returns (Result);
+  rpc FSDelete (Param) returns (Result);
+  rpc FSMove (Param) returns (Result);
+  rpc FSList (Param) returns (Result);
+  rpc RCloneCopy (Param) returns (stream Result);
+  rpc RCloneMove (Param) returns (stream Result);
+  rpc RCloneLink (Param) returns (stream Result);
+  rpc RCloneList (Param) returns (stream Result);
+  rpc RCloneListFormat (Param) returns (stream Result);
+  rpc RCloneListDirectory (Param) returns (stream Result);
+  rpc RCloneListRemotes (Param) returns (stream Result);
+  rpc RCloneListJson (Param) returns (stream Result);
+  rpc RCloneMkdir (Param) returns (stream Result);
+  rpc RCloneAbout (Param) returns (stream Result);
+}
+
+message Result {
+  int32 Code = 1; //0 for Success, 1 for Received
+
+  string Msg = 2;
+
+  optional bytes Data = 3; //Data or File Unique Mark
+
+  repeated FileInfo FileInfo = 4;
+}
+
+message FileInfo {
+  int32 index = 1;
+
+  bytes data = 2;
+
+  bool isDir = 3;
+
+  string name = 4;
+}
+
+message Param {
+  optional string Source = 1; // Source or Operation Path
+  optional string Destination = 2;
+  optional FileInfo Data = 3;
+  repeated RcloneArguments Args = 4;
+}
+
+enum RcloneArguments {
+  NO_TRAVERSE = 0;
+  CREATE_EMPTY_SRC_DIRS = 1;
+  DELETE_EMPTY_SRC_DIRS = 2;
+  ABOUT_FORMAT_JSON = 3;
+}
+

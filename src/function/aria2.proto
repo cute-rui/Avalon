@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package aria2;
+
+option go_package = "./aria2";
+
+service Aria2Agent {
+  // rpc ChangeGlobalOptions (Param) returns (Result);
+  // rpc ChangePosition (Param) returns (Result);
+  // rpc ChangeTaskOptions (Param) returns (Result);
+  // rpc GetFilesInfo (Param) returns (Result);
+  // rpc GetGlobalOptions (Param) returns (Result);
+  // rpc GetGlobalStat (Param) returns (Result);
+  // rpc GetTaskOptions (Param) returns (Result);
+  // rpc IsFinished (Param) returns (Result);
+  // rpc AddDownloadTask (Param) returns (Result);
+  // rpc Pause (Param) returns (Result);
+  // rpc Unpause (Param) returns (Result);
+  // rpc Remove (Param) returns (Result);
+  // rpc RemoveDownloadResult (Param) returns (Result);
+  // rpc TellActive (Param) returns (Result);
+  // rpc TellStatus (Param) returns (Result);
+  // rpc TellStopped (Param) returns (Result);
+  // rpc TellWaiting (Param) returns (Result);
+  rpc AwaitDownload (Param) returns (stream Result);
+  rpc CheckDownload (Param) returns (Result);
+}
+
+message Result {
+  int32 Code = 1; //0 for Success, 1 for Received
+
+  string Msg = 2;
+
+  map<string, FileInfo> FileInfo = 3;
+
+}
+
+message FileInfo {
+  string GID = 1;
+  bool isFinished = 2;
+}
+
+message Param {
+  repeated DownloadInfo DownloadInfoList = 1;
+  repeated string GIDList = 2;
+}
+
+message DownloadInfo {
+  DownloadType DownloadType = 1;
+  string URL = 2;
+  string Destination = 3;
+  string FileName = 4;
+  DownloadOption DownloadOption = 5;
+  string Token = 6;
+}
+
+enum DownloadType {
+  HTTP = 0;
+  MAGLINK = 1;
+  TORRENT = 2;
+  METALINK = 3;
+}
+
+message DownloadOption {
+  map<string, string> WithHeader = 1;
+}

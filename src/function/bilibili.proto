@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package bilibili;
+
+option go_package = "./bilibili";
+
+service Bilibili {
+  rpc GetDownloadInfo (Param) returns (DownloadInfo);
+  rpc GetInfo (Param) returns (Info);
+}
+
+enum DataType {
+  Video = 0;
+  Season = 1;
+  Media = 2;
+  Audio = 3;
+  Article = 4;
+  Collection = 5;
+}
+
+message Info {
+  int32 Code = 1;
+
+  string Msg = 2;
+
+  DataType Type = 3;
+
+  optional string Picture = 4;
+
+  optional string BV = 5;
+
+  optional int64 AV = 6;
+
+  optional string Title = 7;
+
+  optional string Author = 8;
+
+  optional int64 CreateTime = 9;
+
+  optional int64 PublicTime = 10;
+
+  optional int64 Duration = 11;
+
+  optional string Description = 12;
+
+  optional string Dynamic = 13;
+
+  //Season and Episode
+  optional string Evaluate = 14;
+
+  optional string Area = 15;
+
+  optional string SerialStatusDescription = 16;
+
+  optional string ShareURL = 17;
+
+  //Media
+
+  optional string MediaType = 18;
+
+}
+
+message Param {
+  string Mark = 1;
+
+  bool CheckCollection = 2;
+}
+
+message DownloadInfo {
+  int32 Code = 1;
+
+  string Msg = 2;
+
+  DataType Type = 3;
+
+  string ID = 4;
+
+  optional string Author = 6;
+
+  optional bool IsEnd = 7;
+
+  repeated PartInfo Detail = 8;
+
+  optional string CollectionTitle = 5;
+}
+
+message PartInfo {
+  int32 Index = 1;
+
+  string ID = 2;
+
+  string CID = 3;
+
+  string Title = 4; // Video Title or Episode Title
+
+  string SubTitle = 5; // Part Title or Episode Title
+
+  string VideoQuality = 6;
+
+  string VideoURL = 7;
+
+  string AudioURL = 8;
+}
+
+

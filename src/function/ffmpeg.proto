@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package ffmpeg;
+
+option go_package = "./ffmpeg";
+
+service FFMPEG {
+  rpc MergeVideo (Param) returns (Info);
+}
+
+message Info {
+  int32 Code = 1;
+
+  string Msg = 2;
+}
+
+message Param {
+  string InputVideo = 1;
+  string InputAudio = 2;
+  string OutputVideo = 3;
+}
+
