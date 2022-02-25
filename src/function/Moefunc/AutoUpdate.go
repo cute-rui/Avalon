@@ -226,9 +226,8 @@ func CheckIsEnd(ss string) bool {
 	}
 
 	for i := 0; i <= retry; i++ {
-		v, err := bilibili.GetDownloadLink(utils.StringBuilder(`https://www.bilibili.com/bangumi/play/ss`, ss), false)
-		if err == nil && v != nil {
-			VideoList = v
+		VideoList, err = bilibili.GetDownloadLink(utils.StringBuilder(`https://www.bilibili.com/bangumi/play/ss`, ss), false)
+		if err == nil {
 			break
 		}
 		log.Logger.Error(err)
