@@ -79,7 +79,7 @@ func PrepareResponse(bid, sid int, bangumiName string) string {
 		return ``
 	}
 
-	if anime == nil {
+	if len(anime.Resources) == 0 {
 		return ``
 	}
 

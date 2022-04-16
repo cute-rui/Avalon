@@ -5,6 +5,7 @@ package bilibili;
 option go_package = "./bilibili";
 
 service Bilibili {
+  rpc DoDownloadQuery (Param) returns (Query);
   rpc GetDownloadInfo (Param) returns (DownloadInfo);
   rpc GetInfo (Param) returns (Info);
 }
@@ -16,6 +17,14 @@ enum DataType {
   Audio = 3;
   Article = 4;
   Collection = 5;
+}
+
+enum Region {
+  CN = 0;
+  INTL = 1;
+  HK = 2;
+  TW = 3;
+  TH = 4;
 }
 
 message Info {
@@ -61,12 +70,20 @@ message Info {
 }
 
 message Param {
-  string Mark = 1;
+  string URL = 1;
 
-  bool CheckCollection = 2;
+  optional string ID = 2;
+
+  optional string CID = 6;
+
+  bool CheckCollection = 3;
+
+  optional DataType Type = 4;
+
+  optional Region Region = 5;
 }
 
-message DownloadInfo {
+message Query {
   int32 Code = 1;
 
   string Msg = 2;
@@ -79,15 +96,37 @@ message DownloadInfo {
 
   optional bool IsEnd = 7;
 
-  repeated PartInfo Detail = 8;
+  repeated QueryInfo Detail = 8;
 
   optional string CollectionTitle = 5;
+}
+
+message QueryInfo {
+  int32 Index = 1;
+
+  string ID = 2;
+
+  optional string BVID = 3;
+
+  optional string Author = 4;
+
+  optional Region Region = 5;
+}
+
+message DownloadInfo {
+  int32 Code = 1;
+
+  string Msg = 2;
+
+  repeated PartInfo Detail = 3;
+
+  DataType Type = 4;
 }
 
 message PartInfo {
   int32 Index = 1;
 
-  string ID = 2;
+  string ID = 2; //CID or EPID
 
   string CID = 3;
 
@@ -100,6 +139,18 @@ message PartInfo {
   string VideoURL = 7;
 
   string AudioURL = 8;
+
+  repeated Subtitle Subtitles = 9;
+}
+
+message Subtitle {
+  int32 Index = 1;
+
+  string locale = 2;
+
+  string localeText = 3;
+
+  string subtitleUrl = 4;
 }
 
 

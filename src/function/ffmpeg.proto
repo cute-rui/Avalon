@@ -18,5 +18,15 @@ message Param {
   string InputVideo = 1;
   string InputAudio = 2;
   string OutputVideo = 3;
+
+  repeated Subtitle Subtitles = 4;
+}
+
+message Subtitle {
+  string locale = 1;
+
+  string localeText = 2;
+
+  string subtitleUrl = 3;
 }
 

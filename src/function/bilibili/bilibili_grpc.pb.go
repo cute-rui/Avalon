@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BilibiliClient interface {
+	DoDownloadQuery(ctx context.Context, in *Param, opts ...grpc.CallOption) (*Query, error)
 	GetDownloadInfo(ctx context.Context, in *Param, opts ...grpc.CallOption) (*DownloadInfo, error)
 	GetInfo(ctx context.Context, in *Param, opts ...grpc.CallOption) (*Info, error)
 }
@@ -28,6 +29,15 @@ type bilibiliClient struct {
 
 func NewBilibiliClient(cc grpc.ClientConnInterface) BilibiliClient {
 	return &bilibiliClient{cc}
+}
+
+func (c *bilibiliClient) DoDownloadQuery(ctx context.Context, in *Param, opts ...grpc.CallOption) (*Query, error) {
+	out := new(Query)
+	err := c.cc.Invoke(ctx, "/bilibili.Bilibili/DoDownloadQuery", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *bilibiliClient) GetDownloadInfo(ctx context.Context, in *Param, opts ...grpc.CallOption) (*DownloadInfo, error) {
@@ -52,6 +62,7 @@ func (c *bilibiliClient) GetInfo(ctx context.Context, in *Param, opts ...grpc.Ca
 // All implementations must embed UnimplementedBilibiliServer
 // for forward compatibility
 type BilibiliServer interface {
+	DoDownloadQuery(context.Context, *Param) (*Query, error)
 	GetDownloadInfo(context.Context, *Param) (*DownloadInfo, error)
 	GetInfo(context.Context, *Param) (*Info, error)
 	mustEmbedUnimplementedBilibiliServer()
@@ -61,6 +72,9 @@ type BilibiliServer interface {
 type UnimplementedBilibiliServer struct {
 }
 
+func (UnimplementedBilibiliServer) DoDownloadQuery(context.Context, *Param) (*Query, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DoDownloadQuery not implemented")
+}
 func (UnimplementedBilibiliServer) GetDownloadInfo(context.Context, *Param) (*DownloadInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDownloadInfo not implemented")
 }
@@ -78,6 +92,24 @@ type UnsafeBilibiliServer interface {
 
 func RegisterBilibiliServer(s grpc.ServiceRegistrar, srv BilibiliServer) {
 	s.RegisterService(&Bilibili_ServiceDesc, srv)
+}
+
+func _Bilibili_DoDownloadQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Param)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BilibiliServer).DoDownloadQuery(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/bilibili.Bilibili/DoDownloadQuery",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BilibiliServer).DoDownloadQuery(ctx, req.(*Param))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Bilibili_GetDownloadInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -123,6 +155,10 @@ var Bilibili_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "bilibili.Bilibili",
 	HandlerType: (*BilibiliServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "DoDownloadQuery",
+			Handler:    _Bilibili_DoDownloadQuery_Handler,
+		},
 		{
 			MethodName: "GetDownloadInfo",
 			Handler:    _Bilibili_GetDownloadInfo_Handler,

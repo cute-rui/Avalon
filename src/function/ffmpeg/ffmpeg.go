@@ -1,45 +1,93 @@
 package ffmpeg
 
 import (
-	"avalon-core/src/config"
-	"avalon-core/src/log"
-	"avalon-core/src/utils"
-	"context"
-	"errors"
-	"google.golang.org/grpc"
+    "avalon-core/src/config"
+    "avalon-core/src/log"
+    "avalon-core/src/utils"
+    "context"
+    "errors"
+    "google.golang.org/grpc"
 )
 
 var Conn *grpc.ClientConn
 
 func init() {
-	c, err := grpc.Dial(config.Conf.GetString(`worker.ffmpeg.grpc.addr`), grpc.WithInsecure())
-	if err != nil {
-		log.Logger.Error(err)
-	}
-
-	Conn = c
+    c, err := grpc.Dial(config.Conf.GetString(`worker.ffmpeg.grpc.addr`), grpc.WithInsecure())
+    if err != nil {
+        log.Logger.Error(err)
+    }
+    
+    Conn = c
 }
 
 func FFMPEGListener(context.Context, *utils.TransmitterPipes) {
 
 }
 
-func MergeVideo(v, a, output string) error {
-	client := NewFFMPEGClient(Conn)
+func MergeVideo(options ...Options) error {
+    client := NewFFMPEGClient(Conn)
+    
+    param := Param{}
+    
+    for i := range options {
+        options[i](&param)
+    }
+    
+    info, err := client.MergeVideo(context.Background(), &param)
+    
+    if err != nil {
+        return err
+    }
+    
+    if info.Code != 0 {
+        return errors.New(info.Msg)
+    }
+    
+    return nil
+}
 
-	info, err := client.MergeVideo(context.Background(), &Param{
-		InputVideo:  v,
-		InputAudio:  a,
-		OutputVideo: output,
-	})
+type Options func(param *Param)
 
-	if err != nil {
-		return err
-	}
+func SetInputVideo(value string) Options {
+    return func(param *Param) {
+        if param == nil {
+            return
+        }
+        
+        param.InputVideo = value
+    }
+}
 
-	if info.Code != 0 {
-		return errors.New(info.Msg)
-	}
+func SetOutputVideo(value string) Options {
+    return func(param *Param) {
+        if param == nil {
+            return
+        }
+        
+        param.OutputVideo = value
+    }
+}
 
-	return nil
+func SetInputAudio(value string) Options {
+    return func(param *Param) {
+        if param == nil {
+            return
+        }
+        
+        param.InputAudio = value
+    }
+}
+
+func WithSubtitle(locale, localeText, Url string) Options {
+    return func(param *Param) {
+        if param == nil {
+            return
+        }
+        
+        param.Subtitles = append(param.GetSubtitles(), &Subtitle{
+            Locale:      locale,
+            LocaleText:  localeText,
+            SubtitleUrl: Url,
+        })
+    }
 }
