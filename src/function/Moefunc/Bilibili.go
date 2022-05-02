@@ -747,7 +747,7 @@ func DoBilibiliSingleVideoDownload(drive string, targets []string, infos *bilibi
             if BilibiliVideos[i].DownloadStatus != 2 {
                 log.Logger.Error(`error in donwloading video:`, BilibiliVideos[i].SubTitle, `-`, BilibiliVideos[i].ID, `-`, BilibiliVideos[i].CID)
             }
-    
+            
             WG.Done()
         }(index)
         time.Sleep(10 * time.Second)
@@ -757,15 +757,16 @@ func DoBilibiliSingleVideoDownload(drive string, targets []string, infos *bilibi
     return CheckIfBiliVideoValid(BilibiliVideos), nil
 }
 
-func CheckIfBiliVideoValid(BilibiliVideos []*BilibiliVideo) []*BilibiliVideo {
-    for i := range BilibiliVideos {
-        if BilibiliVideos[i].RcloneFileLink == `` || BilibiliVideos[i].DownloadStatus != 2 {
-            BilibiliVideos = append(BilibiliVideos[:i], BilibiliVideos[i+1:]...)
-            i--
+func CheckIfBiliVideoValid(InputVideos []*BilibiliVideo) []*BilibiliVideo {
+    var OutputVideos []*BilibiliVideo
+    for i := range InputVideos {
+        if InputVideos[i].RcloneFileLink == `` || InputVideos[i].DownloadStatus != 2 {
+            continue
         }
+        OutputVideos = append(OutputVideos, InputVideos[i])
     }
     
-    return BilibiliVideos
+    return OutputVideos
 }
 
 func GetBilibiliRcloneDrive() (string, error) {
