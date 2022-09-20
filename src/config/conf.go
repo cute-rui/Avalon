@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"flag"
 )
 
 var Conf = viper.New()
