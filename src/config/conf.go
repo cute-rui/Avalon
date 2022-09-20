@@ -11,7 +11,7 @@ import (
 
 var Conf = viper.New()
 
-var WriteConfig bool
+var WriteConfig = flag.Bool("config", true, "If write config")
 
 func confInit() {
 	Conf.SetConfigType(`toml`)
@@ -95,7 +95,7 @@ func confInit() {
 	Conf.SetEnvKeyReplacer(replacer)
 	err := Conf.ReadInConfig()
 	initLogger()
-	if WriteConfig {
+	if *WriteConfig {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			_, err := os.Create(`./soft/avalon/config/avalon-core.toml`)
 			if err != nil {
