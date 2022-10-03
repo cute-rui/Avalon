@@ -62,8 +62,10 @@ func BilibiliSingleVideoDownload(VideoList *bilibili.ParsedQuery) *models.Bilibi
 		log.Logger.Error(err)
 	}
 
+	isInArtist := false
 	for i := range artist.Videos {
 		if artist.Videos[i].BVID == VideoList.ID {
+			isInArtist = true
 			needUpdate, u := IsSliceNeedUpdateByCheckingCID(artist.Videos[i].Slices, VideoList)
 
 			if len(u) != 0 {
@@ -76,6 +78,10 @@ func BilibiliSingleVideoDownload(VideoList *bilibili.ParsedQuery) *models.Bilibi
 				return &artist.Videos[i]
 			}
 		}
+	}
+
+	if !isInArtist {
+		_, updates = IsSliceNeedUpdateByCheckingCID(nil, VideoList)
 	}
 
 	if len(updates) == 0 {
