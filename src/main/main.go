@@ -9,6 +9,6 @@ func main() {
 	initPprofMonitor()
 	dao.InitDatabase()
 
-	migrate()
+	//migrate()
 	router.Start()
 }
